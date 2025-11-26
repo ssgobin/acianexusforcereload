@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus • Painel Administrativo</title>
+
+  <link rel="stylesheet" href="admin.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="admin-wrapper">
+    <aside class="sidebar">
+      <h2>Nexus <span>Admin</span></h2>
+      <p class="sidebar-sub">Painel avançado de gestão e manutenção da plataforma.</p>
+
+      <nav>
+        <button class="nav-btn active" data-target="view-dashboard">📊 Dashboard</button>
+        <button class="nav-btn" data-target="view-broadcast">📣 Forçar Reload</button>
+        <button class="nav-btn" data-target="view-mural">📰 Mural</button>
+        <button class="nav-btn" data-target="view-presenca">🟢 Presença Online</button>
+        <button class="nav-btn" data-target="view-users">👥 Usuários & Permissões</button>
+        <button class="nav-btn" data-target="view-tools">🧪 Testes & Utilidades</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div id="admin-user-email" class="admin-user-email">Carregando...</div>
+        <small class="muted">Acesso restrito à equipe de TI.</small>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- ============ DASHBOARD ============ -->
+      <section id="view-dashboard" class="view visible">
+        <h1>Visão Geral</h1>
+        <p class="sub">
+          Indicadores em tempo real para monitorar o Nexus.
+        </p>
+
+        <div class="grid-cards">
+          <div class="kpi-card">
+            <span class="kpi-label">Usuários cadastrados</span>
+            <strong id="kpi-users">—</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Usuários online agora</span>
+            <strong id="kpi-online">—</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Último reload forçado</span>
+            <strong id="kpi-reload">—</strong>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Comunicados no mural</span>
+            <strong id="kpi-mural">—</strong>
+          </div>
+        </div>
+
+        <div class="card card-info">
+          <h2>Resumo da última atualização</h2>
+          <div id="dashboard-last-broadcast">
+            <p class="muted">Nenhuma atualização registrada ainda.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ BROADCAST / RELOAD ============ -->
+      <section id="view-broadcast" class="view">
+        <h1>Forçar Reload Global</h1>
+        <p class="sub">
+          Envie uma atualização global que irá recarregar o Nexus para todos os usuários conectados.
+          Após o reload, eles verão uma notificação explicando a mudança.
+        </p>
+
+        <div class="card">
+          <label class="field">
+            <span>Categoria da atualização</span>
+            <input id="bc-category" type="text"
+              placeholder="Ex: Correção de bugs, Atualização visual, Nova funcionalidade...">
+          </label>
+
+          <label class="field">
+            <span>Referência (opcional)</span>
+            <input id="bc-ref" type="text" placeholder="Ex: #card-1882, #deploy-v1.4.1, chamado #TI-009">
+          </label>
+
+          <label class="field">
+            <span>Mensagem para os usuários</span>
+            <textarea id="bc-message" rows="4"
+              placeholder="Explique de forma simples o que foi alterado, corrigido ou adicionado."></textarea>
+          </label>
+
+          <div class="actions-row">
+            <button id="bc-send" class="btn btn-primary">🚀 Enviar Atualização & Forçar Reload</button>
+            <button id="bc-test" class="btn btn-secondary">👀 Ver como o usuário irá enxergar</button>
+          </div>
+
+          <p id="bc-status" class="status"></p>
+          <div class="card card-preview" id="broadcast-preview" style="margin-top:20px; display:none;">
+            <h2>Pré-visualização</h2>
+            <div id="broadcast-preview-content" class="muted">
+              Digite algo e clique em “Ver como o usuário irá enxergar”.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card card-logs">
+          <h2>Histórico de atualizações</h2>
+          <div id="log-list" class="log-list">
+            <p class="muted">Carregando...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MURAL ============ -->
+      <section id="view-mural" class="view">
+        <h1>Mural de Comunicados</h1>
+        <p class="sub">Gerencie comunicados internos exibidos para os usuários.</p>
+
+        <div class="card">
+          <h2>Novo comunicado</h2>
+
+          <label class="field">
+            <span>Título</span>
+            <input id="mural-title" type="text" placeholder="Ex: Aviso importante sobre mudança de horário">
+          </label>
+
+          <label class="field">
+            <span>Mensagem</span>
+            <textarea id="mural-body" rows="3"
+              placeholder="Corpo do comunicado que aparecerá para os usuários."></textarea>
+          </label>
+
+          <button id="mural-send" class="btn btn-primary">📢 Publicar no mural</button>
+          <p id="mural-status" class="status"></p>
+        </div>
+
+        <div class="card">
+          <h2>Comunicados recentes</h2>
+          <div id="mural-list" class="mural-list">
+            <p class="muted">Carregando...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PRESENÇA ============ -->
+      <section id="view-presenca" class="view">
+        <h1>Presença Online</h1>
+        <p class="sub">Visualize os usuários online em tempo real e os últimos acessos.</p>
+
+        <div class="card">
+          <div id="presence-list" class="presence-list">
+            <p class="muted">Carregando...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ USUÁRIOS & PERMISSÕES ============ -->
+      <section id="view-users" class="view">
+        <h1>Usuários & Permissões</h1>
+        <p class="sub">
+          Consulte e altere o papel de cada usuário. Utilize com cuidado – alterações afetam o acesso ao Nexus.
+        </p>
+
+        <div class="card">
+          <div id="users-list" class="users-list">
+            <p class="muted">Carregando...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FERRAMENTAS / TESTES ============ -->
+      <section id="view-tools" class="view">
+        <h1>Ferramentas de Teste & Utilidades</h1>
+        <p class="sub">Ações rápidas para validar funcionalidades de sistema.</p>
+
+        <div class="grid-cards">
+          <div class="tool-card">
+            <h3>Inbox de Teste</h3>
+            <p>Envia uma notificação de teste para a inbox do usuário logado.</p>
+            <button id="tool-inbox-test" class="btn btn-secondary">Enviar notificação de teste</button>
+          </div>
+
+          <div class="tool-card">
+            <h3>Ping Firestore</h3>
+            <p>Valida se o Firestore está respondendo corretamente para este projeto.</p>
+            <button id="tool-ping" class="btn btn-secondary">Executar ping</button>
+            <p id="tool-ping-result" class="status"></p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+
+</html>
