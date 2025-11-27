@@ -234,8 +234,6 @@ document.getElementById("bc-test")?.addEventListener("click", () => {
   statusEl.className = "status muted";
 });
 
-
-
 async function loadBroadcastLogs() {
   const listEl = document.getElementById("log-list");
   if (!listEl) return;
@@ -566,6 +564,57 @@ function formatLastSeen(ts) {
 }
 
 /* -------------------------------------
+  MAINTENANCE MODE TOGGLE
+-------------------------------------- */
+async function loadMaintenanceToggle() {
+  const toggle = document.getElementById("toggleMaintenance");
+  const status = document.getElementById("maintenanceStatus");
+
+  // Se a view não estiver visível / elementos não existirem, não faz nada
+  if (!toggle || !status) return;
+
+  try {
+    const snap = await getDoc(doc(db, "admin", "broadcast"));
+    const data = snap.exists() ? snap.data() : {};
+
+    toggle.checked = data.maintenance === true;
+
+    status.textContent = toggle.checked
+      ? "Modo de manutenção ATIVO"
+      : "Modo de manutenção desativado";
+
+    status.className = toggle.checked ? "status err" : "status ok";
+
+    toggle.onchange = async () => {
+      const newVal = toggle.checked;
+
+      try {
+        await setDoc(doc(db, "admin", "broadcast"), {
+          maintenance: newVal,
+          maintenanceUpdatedAt: Date.now(),
+        }, { merge: true });
+
+        status.textContent = newVal
+          ? "Modo de manutenção ATIVO"
+          : "Modo de manutenção desativado";
+
+        status.className = newVal ? "status err" : "status ok";
+
+      } catch (err) {
+        console.error("[Admin] Erro ao atualizar modo de manutenção:", err);
+        status.textContent = "Erro ao atualizar modo de manutenção.";
+        status.className = "status err";
+      }
+    };
+
+  } catch (err) {
+    console.error("[Admin] Erro ao carregar modo de manutenção:", err);
+    status.textContent = "Erro ao carregar status de manutenção.";
+    status.className = "status err";
+  }
+}
+
+/* -------------------------------------
   INIT
 -------------------------------------- */
 onAuthStateChanged(auth, async (user) => {
@@ -582,10 +631,11 @@ onAuthStateChanged(auth, async (user) => {
     await loadMuralList();
     await loadPresence();
     await loadUsers();
+    await loadMaintenanceToggle(); // 🔥 aqui ligamos o toggle de manutenção
   } catch (err) {
     console.warn("[Admin] Acesso bloqueado ou erro durante init:", err);
   }
 });
 
 // tenta login automático ao abrir a página
-autoLogin().catch(() => {});
+autoLogin().catch(() => { });
