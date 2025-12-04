@@ -349,7 +349,7 @@ async function loadMuralList() {
         <div class="mural-item">
           <strong>${escapeHtml(x.title || "(sem título)")}</strong><br>
           <div>${escapeHtml(x.corpo || "")}</div>
-          <small class="muted">${dt} • por ${escapeHtml(x.createdBy || "Admin")}</small>
+          <small class="muted">${dt} • por ${escapeHtml(x.authorName || "Admin")}</small>
         </div>
       `);
     });
