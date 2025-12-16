@@ -458,14 +458,38 @@ async function loadUsers() {
               <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
             </select>
           </div>
-          <div>
+          <div style="display:flex;gap:6px">
             <button class="btn btn-secondary btn-sm" data-save="${id}">Salvar</button>
+            <button class="btn btn-secondary btn-sm" data-reload="${id}">🔄 Reload</button>
           </div>
+
         </div>
       `;
     });
 
     listEl.innerHTML = html;
+    listEl.querySelectorAll("[data-reload]").forEach(btn => {
+      btn.onclick = async () => {
+        const uid = btn.dataset.reload;
+
+        btn.disabled = true;
+        btn.textContent = "Forçando...";
+
+        try {
+          await forceReloadUser(uid);
+          btn.textContent = "Enviado ✔";
+        } catch (err) {
+          console.error("[Admin] Erro ao forçar reload:", err);
+          btn.textContent = "Erro ❌";
+        }
+
+        setTimeout(() => {
+          btn.textContent = "🔄 Reload";
+          btn.disabled = false;
+        }, 1200);
+      };
+    });
+
 
     // listeners
     listEl.querySelectorAll("[data-save]").forEach(btn => {
@@ -613,6 +637,18 @@ async function loadMaintenanceToggle() {
     status.className = "status err";
   }
 }
+
+async function forceReloadUser(uid) {
+  await setDoc(
+    doc(db, "users", uid, "control", "reload"),
+    {
+      forceReloadAt: Date.now(),
+      by: auth.currentUser?.email || "admin"
+    },
+    { merge: true }
+  );
+}
+
 
 /* -------------------------------------
   INIT
