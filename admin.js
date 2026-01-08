@@ -638,6 +638,54 @@ async function loadMaintenanceToggle() {
   }
 }
 
+/* -------------------------------------
+  CARNAVAL THEME TOGGLE
+-------------------------------------- */
+async function loadCarnavalToggle() {
+  const toggle = document.getElementById("toggleCarnavalTheme");
+  const status = document.getElementById("carnavalStatus");
+  if (!toggle || !status) return;
+
+  try {
+    const snap = await getDoc(doc(db, "admin", "broadcast"));
+    const data = snap.exists() ? snap.data() : {};
+
+    toggle.checked = data.carnavalTheme === true;
+
+    status.textContent = toggle.checked
+      ? "Tema de Carnaval ATIVO 🎉"
+      : "Tema de Carnaval desativado";
+
+    status.className = toggle.checked ? "status ok" : "status muted";
+
+    toggle.onchange = async () => {
+      const newVal = toggle.checked;
+      try {
+        await setDoc(doc(db, "admin", "broadcast"), {
+          carnavalTheme: newVal,
+          carnavalThemeUpdatedAt: Date.now(),
+        }, { merge: true });
+
+        status.textContent = newVal
+          ? "Tema de Carnaval ATIVO 🎉"
+          : "Tema de Carnaval desativado";
+
+        status.className = newVal ? "status ok" : "status muted";
+      } catch (err) {
+        console.error("[Admin] Erro ao atualizar tema de Carnaval:", err);
+        status.textContent = "Erro ao atualizar tema de Carnaval.";
+        status.className = "status err";
+      }
+    };
+
+  } catch (err) {
+    console.error("[Admin] Erro ao carregar tema de Carnaval:", err);
+    status.textContent = "Erro ao carregar status do tema de Carnaval.";
+    status.className = "status err";
+  }
+}
+
+
 async function forceReloadUser(uid) {
   await setDoc(
     doc(db, "users", uid, "control", "reload"),
@@ -667,7 +715,8 @@ onAuthStateChanged(auth, async (user) => {
     await loadMuralList();
     await loadPresence();
     await loadUsers();
-    await loadMaintenanceToggle(); // 🔥 aqui ligamos o toggle de manutenção
+    await loadMaintenanceToggle();
+    await loadCarnavalToggle();
   } catch (err) {
     console.warn("[Admin] Acesso bloqueado ou erro durante init:", err);
   }
