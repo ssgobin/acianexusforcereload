@@ -685,6 +685,24 @@ async function loadCarnavalToggle() {
   }
 }
 
+async function bindThemeToggle(toggleId, fieldName) {
+  const toggle = document.getElementById(toggleId);
+  if (!toggle) return;
+
+  const ref = doc(db, "admin", "broadcast");
+  const snap = await getDoc(ref);
+  const data = snap.exists() ? snap.data() : {};
+
+  toggle.checked = data[fieldName] === true;
+
+  toggle.addEventListener("change", async () => {
+    await setDoc(ref, {
+      [fieldName]: toggle.checked,
+      updatedAt: Date.now()
+    }, { merge: true });
+  });
+}
+
 
 async function forceReloadUser(uid) {
   await setDoc(
@@ -721,6 +739,7 @@ onAuthStateChanged(auth, async (user) => {
     console.warn("[Admin] Acesso bloqueado ou erro durante init:", err);
   }
 });
+bindThemeToggle("togglePascoa", "themePascoa");
 
 // tenta login automático ao abrir a página
 autoLogin().catch(() => { });
