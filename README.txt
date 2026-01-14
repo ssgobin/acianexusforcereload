@@ -9,8 +9,6 @@ Arquivos:
 - admin.js    -> Lógica, integração com Firebase e Firestore
 
 Funcionalidades principais:
-- Login automático com usuário de TI (ti@acia.com.br / J@123456)
-- Validação de role "admin" na coleção "users"
 - Dashboard com KPIs:
   - Usuários cadastrados
   - Usuários online
