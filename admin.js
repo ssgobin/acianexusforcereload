@@ -472,11 +472,49 @@ async function loadUsers() {
       btn.onclick = async () => {
         const uid = btn.dataset.reload;
 
+        const { value: form, isConfirmed } = await Swal.fire({
+          title: "🔄 Reload (mensagem personalizada)",
+          html: `
+        <div style="text-align:left;display:grid;gap:10px">
+          <label style="font-size:13px;font-weight:600">Categoria</label>
+          <input id="sw-cat" class="swal2-input" placeholder="Ex: Atualização visual" value="Atualização">
+
+          <label style="font-size:13px;font-weight:600">Referência (opcional)</label>
+          <input id="sw-ref" class="swal2-input" placeholder="Ex: #deploy-v1.4.1">
+
+          <label style="font-size:13px;font-weight:600">Mensagem</label>
+          <textarea id="sw-msg" class="swal2-textarea" placeholder="Explique o que mudou para esse usuário..."></textarea>
+        </div>
+      `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: "Enviar reload",
+          cancelButtonText: "Cancelar",
+          preConfirm: () => {
+            const category = document.getElementById("sw-cat").value.trim();
+            const ref = document.getElementById("sw-ref").value.trim();
+            const message = document.getElementById("sw-msg").value.trim();
+
+            if (!category) {
+              Swal.showValidationMessage("Categoria é obrigatória.");
+              return;
+            }
+            if (!message) {
+              Swal.showValidationMessage("Mensagem é obrigatória.");
+              return;
+            }
+
+            return { category, ref, message };
+          }
+        });
+
+        if (!isConfirmed || !form) return;
+
         btn.disabled = true;
         btn.textContent = "Forçando...";
 
         try {
-          await forceReloadUser(uid);
+          await forceReloadUser(uid, form);
           btn.textContent = "Enviado ✔";
         } catch (err) {
           console.error("[Admin] Erro ao forçar reload:", err);
@@ -489,6 +527,8 @@ async function loadUsers() {
         }, 1200);
       };
     });
+
+
 
 
     // listeners
@@ -704,17 +744,19 @@ async function bindThemeToggle(toggleId, fieldName) {
 }
 
 
-async function forceReloadUser(uid) {
+async function forceReloadUser(uid, payload) {
   await setDoc(
     doc(db, "users", uid, "control", "reload"),
     {
       forceReloadAt: Date.now(),
+      category: payload.category || "Atualização",
+      ref: payload.ref || "",
+      message: payload.message || "",
       by: auth.currentUser?.email || "admin"
     },
     { merge: true }
   );
 }
-
 
 /* -------------------------------------
   INIT
